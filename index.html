@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search engine</title>
+    <link rel="stylesheet" href="https://www.nerdfonts.com/assets/css/webfont.css">
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #eaeaea;
+            font-family: monospace;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .terminal {
+            background-color: #1a1a1a;
+            color: #eaeaea;
+            padding: 10px;
+            font-family: monospace;
+            width: 600px;
+            height: 400px;
+            overflow-y: auto;
+        }
+
+        .terminal pre {
+            margin: 0;
+        }
+
+        .terminal input {
+            background-color: transparent;
+            color: #eaeaea;
+            border: none;
+            outline: none;
+            font-family: monospace;
+            font-size: 14px;
+            width: 100%;
+            padding: 5px;
+        }
+
+        .terminal input:focus {
+            outline: none;
+        }
+
+        .terminal-prompt {
+            display: flex;
+            align-items: center;
+        }
+
+        .terminal-prompt .user {
+            color: #ff5555;
+            margin-right: 5px;
+        }
+
+        .terminal-prompt .host {
+            color: #ffffff;
+            margin-right: 5px;
+        }
+
+        .terminal-prompt .path {
+            color: #55ff55;
+            margin-right: 5px;
+        }
+
+        .terminal-prompt .git {
+            color: #ffaa55;
+            margin-right: 5px;
+        }
+
+        .terminal-prompt .prompt-symbol {
+            color: #ffffff;
+            margin-right: 5px;
+        }
+
+        .search-results {
+            color: #ffff00;
+            font-weight: bold;
+        }
+
+        .social-media-links a {
+            color: #55b6ff;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <pre id="output"></pre>
+        <div class="terminal-prompt">
+            <span class="host"><i class="nf nf-linux-archlinux"></i></span>
+             <span class="git"><i class="nf nf-md-folder_pound_outline"></i></span>
+             <span class="git">~/Documents</span>
+            <span class="prompt-symbol">#</span>
+            <input type="text" id="input" autofocus>
+        </div>
+    </div>
+
+    <script>
+        var outputElement = document.getElementById("output");
+        var inputElement = document.getElementById("input");
+
+        function writeToTerminal(text) {
+            outputElement.innerHTML += text;
+        }
+            var fileList = [
+                "VulnHub ICA 1.md",
+                "BuffEMR VulnHub.md",
+                "Momentum 1.md",
+                "Borderlands.md",
+                "Cheesey.md",
+                "MyExpense.md",
+                "Opacity.md",
+                "Venom 1.md"
+            ];
+function searchArticlesForKeyword(keywords) {
+  var searchResults = [];
+
+  function checkArticleContent(articleURL, articleContent) {
+    var foundKeywords = keywords.filter(function(keyword) {
+      return articleContent.toLowerCase().includes(keyword.toLowerCase());
+    });
+
+    if (foundKeywords.length > 0) {
+      var title = articleURL.replace(".md", "");
+      searchResults.push({
+        title: title,
+        content: articleContent,
+        keywords: foundKeywords
+      });
+    }
+  }
+
+  Promise.all(
+    fileList.map(function(articleURL) {
+      return fetch("MachineWriteups/" + articleURL)
+        .then(function(response) {
+          return response.text();
+        })
+        .then(function(articleContent) {
+          checkArticleContent(articleURL, articleContent);
+        })
+        .catch(function(error) {
+          console.error("Error occurred during search:", error);
+        });
+    })
+  ).then(function() {
+    if (searchResults.length > 0) {
+      var searchResultsHTML = `<div class="search-results">Search Results for: ${keywords.join(
+        " "
+      )}</div>`;
+      var filenames = searchResults.map(result => result.title);
+      searchResultsHTML += `<div class="search-results">What you are looking for can be found in the following write-ups: ${filenames.join(", ")}</div>`;
+
+      searchResults.forEach(function(result) {
+        var highlightedContent = result.content;
+        result.keywords.forEach(function(keyword) {
+          highlightedContent = highlightedContent.replace(
+            new RegExp(keyword, "gi"),
+            '<span class="search-results">$&</span>'
+          );
+        });
+
+        searchResultsHTML += `<div class="search-result">
+            <span class="search-result-title">${result.title}</span>
+            <div class="search-result-content">${highlightedContent}</div>
+        </div>`;
+      });
+
+      writeToTerminal(searchResultsHTML);
+    } else {
+      writeToTerminal(
+        `<div class="search-results">No results were found for the keywords: ${keywords.join(
+          " "
+        )}</div>`
+      );
+    }
+  });
+}
+
+
+        function processCommand(command) {
+            if (command === "clear") {
+                outputElement.innerHTML = "";
+            } else if (command === "whoami") {
+                writeToTerminal(`<div class="terminal-prompt">
+                <span class="host"><i class="nf nf-linux-archlinux"></i></span>
+                <span class="git"><i class="nf nf-md-folder_pound_outline"></i></span>
+                <span class="git">~/Documents</span>
+                <span class="prompt-symbol">#</span>
+                </div>`);
+                writeToTerminal("Hello, I'm Kevin!👋\nCurrently, I'm self-studying to prepare for the eLearnSecurity EJPTv2 certification.\n😎 I created this search engine to easily access my writeups and find commands and information whenever\nI need them.\n💪 If you find this tool helpful, give me a star ⭐ and follow me on my social media! 🌟\n\n");
+                writeToTerminal("LinkedIn: <a href='https://www.linkedin.com/in/kevinvanegasz/' target='_blank'>https://www.linkedin.com/in/kevinvanegasz/</a>\n");
+                writeToTerminal("YouTube: <a href='https://www.youtube.com/@kavlx' target='_blank'>https://www.youtube.com/@kavlx</a>\n");
+                writeToTerminal("Buy Me a Coffee: <a href='https://www.buymeacoffee.com/kvlx' target='_blank'>https://www.buymeacoffee.com/kvlx</a>\n");
+                writeToTerminal("GitHub: <a href='https://github.com/kvlx-alt' target='_blank'>https://github.com/kvlx-alt</a>\n");
+            } else if (command === "help") {
+                writeToTerminal(`<div class="terminal-prompt">
+                <span class="host"><i class="nf nf-linux-archlinux"></i></span>
+                <span class="git"><i class="nf nf-md-folder_pound_outline"></i></span>
+                <span class="git">~/Documents</span>
+                <span class="prompt-symbol">#</span>
+                </div>`);
+                writeToTerminal("[!] Just type the word you want to search, for example: sql or rpcclient.\n");
+                writeToTerminal("- clear: Clear the terminal\n");
+                writeToTerminal("- whoami: Display information about me\n");
+                writeToTerminal("- Ctrl+L: Clear the terminal\n");
+                writeToTerminal("- Ctrl+C: Clear input\n");
+                writeToTerminal("- ls: Display the files inside the Articles folder\n");
+                writeToTerminal("- help: Display this help message\n");
+            } else if (command === "ls") {
+                writeToTerminal(`<div class="terminal-prompt">
+                <span class="host"><i class="nf nf-linux-archlinux"></i></span>
+                <span class="git"><i class="nf nf-md-folder_pound_outline"></i></span>
+                <span class="git">~/Documents</span>
+                <span class="prompt-symbol">#</span>
+                </div>`);
+                var lsOutput = fileList.join("<br>");
+                writeToTerminal(lsOutput);
+            } else {
+                writeToTerminal(`<div class="terminal-prompt">
+            <span class="host"><i class="nf nf-linux-archlinux"></i></span>
+             <span class="git"><i class="nf nf-md-folder_pound_outline"></i></span>
+             <span class="git">~/Documents</span>
+            <span class="prompt-symbol">#</span>
+            <input type="text" id="input" autofocus>
+        </div>`);
+              if (command !== "") {
+                var keywords = command.split(" ");
+                searchArticlesForKeyword(keywords);
+
+              }
+            }
+        }
+        inputElement.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                var command = inputElement.value;
+            
+                processCommand(command);
+                inputElement.value = "";
+            }
+        });
+
+        inputElement.addEventListener("keydown", function(event) {
+            if (event.ctrlKey && event.key === "l") {
+                outputElement.innerHTML = "";
+                event.preventDefault();
+            }
+        });
+
+        inputElement.addEventListener("keydown", function(event) {
+            if (event.ctrlKey && event.key === "c") {
+                event.preventDefault();
+                inputElement.value = "";
+            }
+        });
+
+
+        writeToTerminal("Welcome to the Search Engine! 🚀\n\n");
+        writeToTerminal("Type 'help' to display available commands.\n\n");
+    </script>
+</body>
+</html>
